@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 export default function ProductRow({ item, refresh, openHistory }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -14,19 +15,15 @@ export default function ProductRow({ item, refresh, openHistory }) {
     image: item.image,
   });
 
-  // Save changes to backend
-  const handleSave = async () => {
-    await axios.put(`http://localhost:4000/api/products/${item.id}`, form);
+  const save = async () => {
+    await axios.put(`${API_URL}/api/products/${item.id}`, form);
     setIsEditing(false);
     refresh();
   };
 
-  // Delete product
-  const handleDelete = async () => {
-    const ok = window.confirm("Are you sure you want to delete this product?");
-    if (!ok) return;
-
-    await axios.delete(`http://localhost:4000/api/products/${item.id}`);
+  const remove = async () => {
+    if (!window.confirm("Delete this product?")) return;
+    await axios.delete(`${API_URL}/api/products/${item.id}`);
     refresh();
   };
 
@@ -127,42 +124,20 @@ export default function ProductRow({ item, refresh, openHistory }) {
       <td className="p-2">
         {isEditing ? (
           <>
-            <button
-              onClick={handleSave}
-              className="text-green-600 font-semibold mr-3"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => {
-                setIsEditing(false);
-                setForm(item);
-              }}
-              className="text-gray-600"
-            >
+            <button onClick={save} className="text-green-600 mr-3">Save</button>
+            <button onClick={() => setIsEditing(false)} className="text-gray-600">
               Cancel
             </button>
           </>
         ) : (
           <>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-blue-600 mr-3"
-            >
+            <button onClick={() => setIsEditing(true)} className="text-blue-600 mr-3">
               Edit
             </button>
-
-            <button
-              onClick={openHistory}
-              className="text-green-700 mr-3"
-            >
+            <button onClick={openHistory} className="text-green-600 mr-3">
               History
             </button>
-
-            <button
-              onClick={handleDelete}
-              className="text-red-600"
-            >
+            <button onClick={remove} className="text-red-600">
               Delete
             </button>
           </>

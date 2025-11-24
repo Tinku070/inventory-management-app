@@ -1,54 +1,43 @@
-// src/components/Header.js
 import React, { useState } from "react";
 import axios from "axios";
 import AddProductModal from "./AddProductModal";
+import { API_URL } from "../config";
 
-export default function Header({ onSearch }) {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+export default function Header({ setSearch, setCategory }) {
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Export CSV
   const handleExport = () => {
-    window.open("http://localhost:4000/api/products/export", "_blank");
+    window.open(`${API_URL}/api/products/export`, "_blank");
   };
 
-  // Import CSV
   const handleImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("csvFile", file);
+    const form = new FormData();
+    form.append("csvFile", file);
 
-    try {
-      await axios.post("http://localhost:4000/api/products/import", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      // simple refresh
-      window.location.reload();
-    } catch (err) {
-      alert("Import failed: " + (err?.response?.data?.error || err.message));
-    }
+    await axios.post(`${API_URL}/api/products/import`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    window.location.reload();
   };
 
   return (
     <>
       <div className="flex flex-col md:flex-row md:justify-between items-center mb-6 gap-3">
+
+        {/* Search */}
         <input
-          type="text"
           placeholder="Search products..."
           className="border p-2 rounded w-full md:w-1/3"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            if (typeof onSearch === "function") onSearch(e.target.value);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
+        {/* Category Filter */}
         <select
           className="border p-2 rounded"
-          value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">All Categories</option>
@@ -56,13 +45,15 @@ export default function Header({ onSearch }) {
           <option value="Electronics">Electronics</option>
         </select>
 
+        {/* Add Product */}
         <button
-          onClick={() => setShowAddModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={() => setShowAddModal(true)}
         >
           Add Product
         </button>
 
+        {/* Import */}
         <label className="bg-green-600 text-white px-4 py-2 rounded cursor-pointer">
           Import
           <input
@@ -73,6 +64,7 @@ export default function Header({ onSearch }) {
           />
         </label>
 
+        {/* Export */}
         <button
           onClick={handleExport}
           className="bg-gray-700 text-white px-4 py-2 rounded"
